@@ -1,0 +1,46 @@
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MYSQL_DATABASE:-blackcore}
+      MARIADB_USER: ${MYSQL_USER:-blackcore}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - blackcore_db:/var/lib/mysql
+      - ../../sql-files/main.sql:/docker-entrypoint-initdb.d/01-main.sql:ro
+      - ../../sql-files/logs.sql:/docker-entrypoint-initdb.d/02-logs.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-blackcore}
+      MYSQL_USER: ${MYSQL_USER:-blackcore}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      INTERSERVER_USER: ${INTERSERVER_USER:-blackcore_inter}
+      INTERSERVER_PASSWORD: ${INTERSERVER_PASSWORD}
+      PUBLIC_IP: ${PUBLIC_IP}
+    ports:
+      - "6900:6900"
+      - "6121:6121"
+      - "5121:5121"
+    volumes:
+      - blackcore_logs:/opt/blackcore/log
+
+volumes:
+  blackcore_db:
+  blackcore_logs:
