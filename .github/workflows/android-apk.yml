@@ -20,18 +20,16 @@ jobs:
           sudo mv Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
           sudo chmod +x /usr/local/bin/godot
 
-          # Create directory for templates
           mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable/
-          # We need the android_release.apk template for Godot 4
-          # Note: If the specific template name differs, this might need adjustment
           wget -q https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_android_release.apk -O ~/.local/share/godot/export_templates/4.7.2.stable/android_release.apk
 
       - name: Build APK
         run: |
           mkdir -p build
-          # The error log showed it ignored the --path parameter or used it incorrectly.
-          # Forcing explicit path to current directory with --path .
-          godot --headless --path . --export-release "Android" build/BlackCoreAscension.apk
+          # Pass absolute path of current directory to make sure Godot finds the project.godot
+          PWD_PATH=$(pwd)
+          echo "Current directory: $PWD_PATH"
+          godot --headless --path "$PWD_PATH" --export-release "Android" "$PWD_PATH/build/BlackCoreAscension.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
