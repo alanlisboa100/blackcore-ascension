@@ -21,9 +21,6 @@ jobs:
           sudo chmod +x /usr/local/bin/godot
 
           mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable/
-          # Tentando URL alternativa caso a anterior tenha dado 404 (exit code 8 do wget)
-          # A URL oficial de template do Godot 4 frequentemente usa outro sufixo ou precisa de redirect
-          # Vou garantir que o diretório exista corretamente e tentar baixar.
           wget -q https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz -O templates.tpz
           unzip -q templates.tpz -d ~/.local/share/godot/export_templates/
           mv ~/.local/share/godot/export_templates/templates/* ~/.local/share/godot/export_templates/4.7.2.stable/
@@ -31,7 +28,8 @@ jobs:
       - name: Build APK
         run: |
           mkdir -p build
-          godot --headless --path . --export-release "Android" build/BlackCoreAscension.apk
+          # Use --export-debug to avoid needing a release keystore for testing
+          godot --headless --path . --export-debug "Android" build/BlackCoreAscension.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
