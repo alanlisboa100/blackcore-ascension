@@ -1,6 +1,0 @@
-{
-    "remoteConfigLocation": "",
-    "fallbackLoginServer": "127.0.0.1",
-    "fallbackLoginPort": "6900",
-    "fallbackUseSameIpForEveryServer": true
-}
